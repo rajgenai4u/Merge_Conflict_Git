@@ -179,7 +179,96 @@ git push origin feature-b
 
 ---
 
-## 7. Useful Commands Used Along the Way
+## 7. Verify the Merge Event
+
+Although the conflict markers are no longer present in `app.py` (they were
+removed during resolution), the Git merge event itself is permanently recorded
+in the repository history. Run these commands to prove it:
+
+### Show only merge commits
+
+```bash
+git log --merges --oneline --graph --decorate
+```
+
+**Output:**
+
+```
+* c3bb65a Resolve merge conflict between main and feature-b
+```
+
+### Show the merge commit in full
+
+```bash
+git show --stat --format=fuller c3bb65a
+```
+
+**Output:**
+
+```
+commit c3bb65a2d55e355dd3a720e8f9ba1379dd7bc2a9
+Merge: c19fb4a dda319d
+Author:     Karre  Rajesh <rajsai4us@gmail.com>
+AuthorDate: Wed Sep 23 19:20:59 2026 +0800
+Commit:     Karre  Rajesh <rajsai4us@gmail.com>
+CommitDate: Wed Sep 23 19:20:59 2026 +0800
+
+    Resolve merge conflict between main and feature-b
+
+ app.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
+The `Merge: c19fb4a dda319d` line proves `c3bb65a` has **two parents** —
+`c19fb4a` (from `feature-a`) and `dda319d` (from `feature-b`) — which is the
+signature of a real Git merge event.
+
+### Show the full commit graph
+
+```bash
+git log --graph --oneline --decorate --all
+```
+
+**Output:**
+
+```
+* 6c1d060 (HEAD -> main, origin/main) Add project documentation
+*   c3bb65a Resolve merge conflict between main and feature-b
+|\
+| * dda319d (origin/feature-b, feature-b) updated app.py in feature-b
+* | c19fb4a (origin/feature-a, feature-a) file added in feature-a
+|/
+* af4035d Initial commit on main
+```
+
+### Check the original content of each side of the conflict
+
+```bash
+# Left side of the conflict: app.py as it was in feature-a (main's parent)
+git show c19fb4a:app.py
+
+# Right side of the conflict: app.py as it was in feature-b
+git show dda319d:app.py
+```
+
+**Output:**
+
+```
+# c19fb4a (feature-a)
+def welcome():
+    print("Update welcome message in feature-b")
+
+# dda319d (feature-b)
+def welcome():
+    print("Welcome to the Terminal B")
+```
+
+Both branches edited the **same line** of `app.py`, which is exactly why Git
+could not merge automatically and reported a conflict.
+
+---
+
+## 8. Useful Commands Used Along the Way
 
 ```bash
 # Inspect branches
@@ -196,7 +285,7 @@ git status
 
 ---
 
-## 8. Key Takeaway
+## 9. Key Takeaway
 
 Merge conflicts are normal in Git. They happen when two branches modify the
 same lines of the same file. The fix is to **manually resolve the conflicting
